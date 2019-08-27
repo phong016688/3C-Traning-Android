@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
             buttonTru?.id -> {
                 pheptinh = "-"
-                chuoi += ""
+                chuoi = ""
                 try {
                     so1 = editText?.text.toString().toDouble()
                     so2 = 0.0
