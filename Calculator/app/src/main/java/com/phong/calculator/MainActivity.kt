@@ -1,20 +1,32 @@
 package com.phong.calculator
 
 import android.content.Context
+import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.widget.Toolbar
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_main.*
 import java.lang.NumberFormatException
 
+const val STRING_PUT_EXTRA = "stringputextra"
+const val PREF1 = "PREF1"
+const val KEY_STRING_PREF = "keystringpref"
+
 class MainActivity : AppCompatActivity(), View.OnClickListener {
+    val STRING_EDITTEXT = "stringedittext"
+    val STRING_TEXTVIEW = "stringtextview"
     val TAG = "@@@@@@@@@@@"
     private var chuoi: String = ""
     private var pheptinh: String = ""
     private var so1: Double = 0.0
     private var so2: Double = 0.0
+    private var ketqua: String = ""
+    private var list_string: ArrayList<String>? = ArrayList()
     override fun onClick(v: View?) {
         when (v?.getId()) {
             button0?.id -> {
@@ -62,9 +74,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 editText?.setText(chuoi)
             }
             buttonAC?.id -> {
-                if(chuoi != ""){
-                chuoi = chuoi.substring(0, chuoi.length-1)}
-                editText.setText("${chuoi}")
+                if (chuoi != "") {
+                    chuoi = chuoi.substring(0, chuoi.length - 1)
+                }
+                editText?.setText("${chuoi}")
             }
             buttonCong?.id -> {
                 pheptinh = "+"
@@ -117,24 +130,34 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             buttonBang?.id -> {
                 try {
                     so2 = editText?.text.toString().toDouble()
-                }catch (e : NumberFormatException){
-                    Toast.makeText(applicationContext, "Lỗi định dạng số", Toast.LENGTH_LONG).show()
+                } catch (e: NumberFormatException) {
                 }
-                var ketqua : String = ""
-                when(pheptinh){
+                when (pheptinh) {
                     "+" -> ketqua = cong(so1, so2)
                     "-" -> ketqua = tru(so1, so2)
                     "x" -> ketqua = nhan(so1, so2)
                     "/" -> {
                         ketqua = chia(so1, so2)
-                        if (ketqua == "error"){
+                        if (ketqua == "error") {
                             Toast.makeText(applicationContext, "không thể chia cho 0", Toast.LENGTH_LONG).show()
                         }
                     }
                     "%" -> ketqua = chialaydu(so1, so2)
                 }
+                chuoi = ""
+                if (pheptinh != "") {
+                    textViewpheptinh?.setText("${so1}${pheptinh}${so2}")
+                    if (list_string != null) list_string?.add(0, "${so1}${pheptinh}${so2}=${ketqua}")
+                    else {
+                        list_string = ArrayList()
+                        list_string?.add(0, "${so1}${pheptinh}${so2}=${ketqua}")
+                    }
+                    pheptinh = ""
+                } else {
+                    ketqua = "${so2}"
+                    textViewpheptinh?.setText("${so2}")
+                }
                 editText?.setText("${ketqua}")
-                textViewpheptinh?.setText("${so1}${pheptinh}${so2}")
             }
             buttonLaydu?.id -> {
                 pheptinh = "%"
@@ -148,21 +171,71 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
                 }
                 editText?.setText("")
                 textViewpheptinh?.setText("${so1}${pheptinh}")
+
             }
             buttonCongTru?.id -> {
-                if(chuoi.contains('-')){
+                if (chuoi.contains('-')) {
                     chuoi = chuoi.substring(1, chuoi.length)
-                }else chuoi = "-$chuoi"
-                editText.setText("${chuoi}")
+                } else chuoi = "-$chuoi"
+                editText?.setText("${chuoi}")
             }
-
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        var tool: Toolbar = findViewById<Toolbar>(R.id.toolBar)
+        setSupportActionBar(tool)
         init()
+
+
+    }
+
+    private fun prefdata() {
+        var set: Set<String>? = null
+        try {
+            set = getSharedPreferences(PREF1, Context.MODE_PRIVATE).getStringSet(KEY_STRING_PREF, null)
+            Log.d("@@@@@@", "lay ko loi 1")
+        } catch (e: Exception) {
+            Log.e("@@@@@@", e.toString())
+        }
+        list_string =  ArrayList(set)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        if (item?.itemId == R.id.menu3) {
+            var set: Set<String>? = emptySet()
+            set = list_string?.toSet()
+            Log.d("@@@@@@", "${set?.size}")
+            getSharedPreferences(PREF1, Context.MODE_PRIVATE).edit().putStringSet(KEY_STRING_PREF, set)
+                .apply()
+            var intent = Intent(this, Main2Activity::class.java)
+            startActivity(intent)
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle?) {
+        super.onSaveInstanceState(outState)
+        outState?.putString(STRING_EDITTEXT, editText?.text.toString())
+        outState?.putString(STRING_TEXTVIEW, textViewpheptinh?.text.toString())
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
+        super.onRestoreInstanceState(savedInstanceState)
+        editText?.setText(savedInstanceState?.get(STRING_EDITTEXT).toString())
+        textViewpheptinh?.setText(savedInstanceState?.get(STRING_TEXTVIEW).toString())
+    }
+
+    override fun onStart() {
+        super.onStart()
+        prefdata()
     }
 
     private fun cong(a: Double, b: Double): String {
@@ -181,9 +254,11 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         var s: String = if (b != 0.0) "${a / b}" else "error"
         return s
     }
-    private fun chialaydu(a:Double, b: Double): String{
-        return "${a%b}"
+
+    private fun chialaydu(a: Double, b: Double): String {
+        return "${a % b}"
     }
+
     private fun init() {
         button0?.setOnClickListener(this)
         button1?.setOnClickListener(this)
@@ -203,7 +278,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         buttonNhan?.setOnClickListener(this)
         buttonBang?.setOnClickListener(this)
         buttonCongTru?.setOnClickListener(this)
-        buttonAC.setOnLongClickListener{
+        buttonLaydu.setOnClickListener(this)
+        buttonAC?.setOnLongClickListener {
             editText?.setText("")
             textViewpheptinh?.setText("")
             so1 = 0.0

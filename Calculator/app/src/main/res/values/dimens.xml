@@ -3,6 +3,6 @@
     <dimen name="dimenlayout">4dp</dimen>
     <dimen name="dimenbutton">2dp</dimen>
     <dimen name="sizetextButton">35sp</dimen>
-    <dimen name="textsizeEdit">24sp</dimen>
+    <dimen name="textsizeEdit">30sp</dimen>
     <dimen name="paddingEdit">10dp</dimen>
 </resources>

@@ -3,11 +3,19 @@
         xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_height="match_parent"
-        android:layout_width="match_parent"
+        android:layout_width="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
         android:id="@+id/layout"
-        android:weightSum="9"
         android:layout_margin="@dimen/dimenlayout"
         android:orientation="vertical">
+    <android.support.v7.widget.Toolbar
+            android:id="@+id/toolBar"
+            app:title="CACULATOR"
+            app:titleTextColor="#AA090909"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            android:background="#AA85CEF1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+    </android.support.v7.widget.Toolbar>
     <LinearLayout android:layout_width="match_parent"
                   android:layout_weight="4"
                   android:orientation="vertical"
@@ -24,8 +32,9 @@
                   android:gravity="bottom|end"
                   android:ellipsize="start"
                   android:ems="20"
+                  android:cursorVisible="false"
                   android:padding="@dimen/paddingEdit"
-                  android:text = "0"
+                  android:text="0"
                   android:textSize="@dimen/textsizeEdit"
                   android:layout_gravity="center"
                   android:layout_width="match_parent"
